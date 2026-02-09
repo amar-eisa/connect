@@ -1,0 +1,57 @@
+name: Deploy Connect App to VPS
+
+on:
+  push:
+    branches:
+      - main  # تأكد أن هذا هو اسم الفرع الرئيسي عندك (أحياناً يكون master)
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. تسجيل الدخول لـ Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 2. بناء ورفع الصورة (مع تمرير متغيرات Supabase)
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/connect-app:latest
+          # هنا نمرر الأسرار من GitHub إلى Dockerfile أثناء البناء
+          build-args: |
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+            VITE_SUPABASE_PROJECT_ID=${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
+      # 3. الدخول للسيرفر وتشغيل الحاوية الجديدة
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # سحب أحدث نسخة من الصورة
+            docker pull ${{ secrets.DOCKER_USERNAME }}/connect-app:latest
+            
+            # إيقاف وحذف الحاوية القديمة (إن وجدت) لتجنب التعارض
+            docker stop connect-app || true
+            docker rm connect-app || true
+            
+            # تشغيل الحاوية الجديدة
+            # نربط المنفذ 8002 في السيرفر بالمنفذ 80 في الحاوية
+            docker run -d \
+              --name connect-app \
+              --restart unless-stopped \
+              -p 8002:80 \
+              ${{ secrets.DOCKER_USERNAME }}/connect-app:latest
