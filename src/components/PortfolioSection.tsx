@@ -4,6 +4,7 @@ import alo80 from "@/assets/projects/alo80.png";
 import restaurantPos from "@/assets/projects/restaurant-pos.png";
 import smartScheduling from "@/assets/projects/smart-scheduling.png";
 import pharmaConnect from "@/assets/projects/pharma-connect.png";
+import clinicManagement from "@/assets/projects/clinic-management.png";
 
 const PortfolioSection = () => {
   const projects = [
@@ -53,6 +54,18 @@ const PortfolioSection = () => {
         "تصميم متجاوب وسلس",
         "عرض واضح للخدمات",
         "تحويل الزوار لعملاء",
+      ],
+    },
+     {
+      image: clinicManagement,
+      title: "نظام إدارة العيادات",
+      subtitle: "Clinic Management",
+      description:
+        "نظام متكامل لإدارة العيادات والمستوصفات يشمل الاستقبال، المعمل، الصيدلية، وإدارة المستخدمين مع تقارير فحوصات تفصيلية.",
+      features: [
+        "إدارة شاملة للفحوصات والتحاليل",
+        "ربط الصيدلية بالعيادة",
+        "تقارير طبية احترافية",
       ],
     },
   ];
