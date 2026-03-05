@@ -66,6 +66,17 @@ const ContactSection = () => {
         console.error('WhatsApp notification failed:', err);
       });
 
+      // إرسال البيانات إلى n8n لإشعار التيليجرام
+      fetch('https://8n8.connectsys.cloud/webhook/63857cf5-fc2a-412e-a598-5c2979b15008', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contactData),
+      }).catch(err => {
+        console.error('n8n Telegram notification failed:', err);
+      });
+
       setIsSubmitted(true);
       toast({
         title: "تم إرسال طلبك بنجاح!",
