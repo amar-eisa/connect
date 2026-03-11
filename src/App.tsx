@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,9 +8,11 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import AdminLogin from "./pages/AdminLogin";
-import NotFound from "./pages/NotFound";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -23,17 +26,20 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/login" element={<Suspense fallback={null}><AdminLogin /></Suspense>} />
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute requireAdmin>
-                    <Dashboard />
-                  </ProtectedRoute>
+                  <Suspense fallback={null}>
+                    <ProtectedRoute requireAdmin>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  </Suspense>
                 }
               />
+              <Route path="/privacy" element={<Suspense fallback={null}><Privacy /></Suspense>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
